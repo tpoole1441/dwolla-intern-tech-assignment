@@ -1,8 +1,17 @@
-import Head from 'next/head';
-import useSWR from 'swr';
-import { Box } from '@mui/material';
+import Head from "next/head";
+import useSWR from "swr";
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+  Button,
+} from "@mui/material";
 // Icon for Add Customer button
-import { AddRounded } from '@mui/icons-material';
+import { AddRounded, Padding } from "@mui/icons-material";
 
 export type Customer = {
   firstName: string;
@@ -29,7 +38,7 @@ const Home = () => {
     return body;
   };
   const { data, error, isLoading } = useSWR<Customers, ApiError>(
-    '/api/customers',
+    "/api/customers",
     fetcher
   );
 
@@ -39,17 +48,59 @@ const Home = () => {
         <title>Dwolla | Customers</title>
       </Head>
       <main>
-        <Box>
+        <Box
+          sx={{
+            bgcolor: "paper",
+            padding: 2,
+            container: true,
+          }}
+        >
           {isLoading && <p>Loading...</p>}
           {error && <p>Error: {error.message}</p>}
           {data && (
-            <ul>
-              {data.map(customer => (
-                <li key={customer.email}>
-                  {customer.firstName} {customer.lastName}
-                </li>
-              ))}
-            </ul>
+            <Box
+              sx={{
+                bgcolor: "white",
+                width: "60%",
+                alignSelf: "center",
+                marginLeft: "auto",
+                marginRight: "auto",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: 2,
+                }}
+              >
+                <Typography variant="h6">{data.length} Customers</Typography>
+                <Box>
+                  <Button variant="contained" endIcon={<AddRounded />}>
+                    Add Customer
+                  </Button>
+                </Box>
+              </Box>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Email</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {data.map((customer) => (
+                    <TableRow key={customer.email}>
+                      <TableCell>
+                        {customer.firstName} {customer.lastName}
+                      </TableCell>
+                      <TableCell>{customer.email}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
           )}
         </Box>
       </main>
