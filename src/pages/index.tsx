@@ -14,7 +14,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  DialogContentText,
   TextField,
 } from "@mui/material";
 // Icon for Add Customer button
@@ -44,10 +43,17 @@ const Home = () => {
     if (!response.ok) throw body;
     return body;
   };
-  const { data, error, isLoading } = useSWR<Customers, ApiError>(
+  const { data, error, isLoading, mutate } = useSWR<Customers, ApiError>(
     "/api/customers",
     fetcher
   );
+
+  const [newCustomer, setNewCustomer] = React.useState<Customer>({
+    firstName: "",
+    lastName: "",
+    businessName: "",
+    email: "",
+  });
 
   const [open, setOpen] = React.useState(false);
   const handleClickOpen = () => {
@@ -55,6 +61,35 @@ const Home = () => {
   };
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleSubmit = async () => {
+    const customerData = {
+      firstName: newCustomer.firstName,
+      lastName: newCustomer.lastName,
+      email: newCustomer.email,
+      businessName: newCustomer.businessName,
+    };
+
+    try {
+      const response = await fetch("/api/customers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(customerData),
+      });
+
+      if (response.ok) {
+        console.log("Customer created successfully!");
+        setOpen(false);
+        mutate();
+      } else {
+        console.error("Error creating customer:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error creating customer:", error);
+    }
   };
 
   return (
@@ -115,6 +150,12 @@ const Home = () => {
                           type="text"
                           variant="outlined"
                           sx={{ width: "30%" }}
+                          onChange={(e) =>
+                            setNewCustomer({
+                              ...newCustomer,
+                              firstName: e.target.value,
+                            })
+                          }
                         />
                         <TextField
                           required
@@ -125,6 +166,12 @@ const Home = () => {
                           type="text"
                           variant="outlined"
                           sx={{ width: "30%" }}
+                          onChange={(e) =>
+                            setNewCustomer({
+                              ...newCustomer,
+                              lastName: e.target.value,
+                            })
+                          }
                         />
                         <TextField
                           margin="dense"
@@ -134,6 +181,12 @@ const Home = () => {
                           type="text"
                           variant="outlined"
                           sx={{ width: "30%" }}
+                          onChange={(e) =>
+                            setNewCustomer({
+                              ...newCustomer,
+                              businessName: e.target.value,
+                            })
+                          }
                         />
                       </Box>
                       <TextField
@@ -145,11 +198,17 @@ const Home = () => {
                         type="email"
                         fullWidth
                         variant="outlined"
+                        onChange={(e) =>
+                          setNewCustomer({
+                            ...newCustomer,
+                            email: e.target.value,
+                          })
+                        }
                       />
                     </DialogContent>
                     <DialogActions>
                       <Button onClick={handleClose}>Cancel</Button>
-                      <Button variant="contained" onClick={handleClose}>
+                      <Button variant="contained" onClick={handleSubmit}>
                         Create
                       </Button>
                     </DialogActions>
